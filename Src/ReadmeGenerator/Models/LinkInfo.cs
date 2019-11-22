@@ -18,7 +18,7 @@ namespace ReadmeGenerator.Models
 
         public override IEnumerable<string> GetWriteLines(string readMeFilePath)
         {
-            var url = FullPath.Replace(readMeFilePath, "").Replace('\\', '/').TrimStart('/');
+            var url = FullPath.Replace(readMeFilePath, "").Replace('\\', '/').Replace(" ","%20").TrimStart('/');
             yield return MarkdownHelper.LinkRowInner(Name, url);
             yield return null;
         }
