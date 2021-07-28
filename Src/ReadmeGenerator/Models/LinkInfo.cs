@@ -11,15 +11,20 @@ namespace ReadmeGenerator.Models
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="fullPath">链接全路径</param>
-        public LinkInfo(string fullPath) : base(fullPath, Path.GetFileNameWithoutExtension(fullPath))
+        /// <param name="readMeFilePath">readme文件目录</param>
+        /// <param name="fullPath">全路径</param>
+        /// <param name="level">层级</param>
+        /// <param name="order">序号</param>
+        public LinkInfo(string readMeFilePath, string fullPath, int level, int order)
+            : base(readMeFilePath, fullPath, Path.GetFileName(fullPath), level, order)
         {
         }
 
-        public override IEnumerable<string> GetWriteLines(string readMeFilePath)
+        public override IEnumerable<string> GetWriteLines()
         {
-            var url = FullPath.Replace(readMeFilePath, "").Replace('\\', '/').Replace(" ","%20").TrimStart('/');
-            yield return MarkdownHelper.LinkRowInner(Name, url);
+            var url = GetUrl();
+            var linkText = $"{Order}.{Name}";
+            yield return $"{GetWhiteSpace()}{MarkdownHelper.LinkRowInner(linkText, url)}";
             yield return null;
         }
     }

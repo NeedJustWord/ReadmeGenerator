@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace ReadmeGenerator.Models
 {
@@ -8,18 +9,33 @@ namespace ReadmeGenerator.Models
     abstract class AbstractInfo
     {
         /// <summary>
+        /// readme文件目录
+        /// </summary>
+        protected readonly string ReadMeFilePath;
+        /// <summary>
         /// 全路径
         /// </summary>
-        public string FullPath { get; }
+        protected readonly string FullPath;
         /// <summary>
         /// 名称
         /// </summary>
-        public string Name { get; }
+        protected readonly string Name;
+        /// <summary>
+        /// 层级
+        /// </summary>
+        protected readonly int Level;
+        /// <summary>
+        /// 序号
+        /// </summary>
+        protected readonly int Order;
 
-        public AbstractInfo(string fullPath, string name)
+        protected AbstractInfo(string readMeFilePath, string fullPath, string name, int level, int order)
         {
+            ReadMeFilePath = readMeFilePath;
             FullPath = fullPath;
             Name = name;
+            Level = level;
+            Order = order;
         }
 
         /// <summary>
@@ -27,6 +43,22 @@ namespace ReadmeGenerator.Models
         /// </summary>
         /// <param name="readMeFilePath"></param>
         /// <returns></returns>
-        public abstract IEnumerable<string> GetWriteLines(string readMeFilePath);
+        public abstract IEnumerable<string> GetWriteLines();
+
+        protected string GetWhiteSpace()
+        {
+            string whiteSpace = "&emsp;&emsp;";
+            StringBuilder sb = new StringBuilder(whiteSpace.Length * Level);
+            for (int i = 0; i < Level; i++)
+            {
+                sb.Append(whiteSpace);
+            }
+            return sb.ToString();
+        }
+
+        protected string GetUrl()
+        {
+            return FullPath.Replace(ReadMeFilePath, "").Replace('\\', '/').Replace(" ", "%20").TrimStart('/');
+        }
     }
 }

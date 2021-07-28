@@ -8,8 +8,8 @@ namespace ReadmeGenerator
 {
     class ReadMeHelper
     {
-        private string root;
-        private string readMeFilePath;
+        private readonly string root;
+        private readonly string readMeFilePath;
 
         /// <summary>
         /// 
@@ -38,13 +38,11 @@ namespace ReadmeGenerator
                         sw.WriteLine(item);
                     }
 
-                    var labelInfos = GetLabelInfos();
-                    foreach (var labelInfo in labelInfos)
+                    var searchPattern = ConfigHelper.GetAppSettingValue("SearchPattern");
+                    var rootInfo = new LabelInfo(readMeFilePath, root, -1, 1, searchPattern);
+                    foreach (var item in rootInfo.Infos.SelectMany(t => t.GetWriteLines()))
                     {
-                        foreach (var item in labelInfo.GetWriteLines(readMeFilePath))
-                        {
-                            sw.WriteLine(item);
-                        }
+                        sw.WriteLine(item);
                     }
                 }
             }
@@ -60,23 +58,6 @@ namespace ReadmeGenerator
             yield return null;
             yield return MarkdownHelper.Heading1(heading);
             yield return null;
-        }
-
-        /// <summary>
-        /// 获取标签列表
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerable<LabelInfo> GetLabelInfos()
-        {
-            var searchPattern = ConfigHelper.GetAppSettingValue("SearchPattern");
-            var labelInfos = Directory.GetDirectories(root)
-                .Select(path => new LabelInfo(path, Directory.GetFiles(path, searchPattern, SearchOption.TopDirectoryOnly)));
-            foreach (var item in labelInfos)
-            {
-                yield return item;
-            }
-
-            yield return new LabelInfo(Directory.GetFiles(root, searchPattern, SearchOption.TopDirectoryOnly));
         }
     }
 }

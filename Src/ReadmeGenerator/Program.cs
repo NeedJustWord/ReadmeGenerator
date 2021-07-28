@@ -28,7 +28,7 @@ namespace ReadmeGenerator
             ReadMeHelper readMe = new ReadMeHelper(blogRoot, readMeFilePath);
             readMe.CreateReadMeFie();
 
-            WriteMessageAndWaitKey("生成readme.md文件成功");
+            WriteMessage("生成readme.md文件成功");
         }
 
         /// <summary>
@@ -86,6 +86,11 @@ namespace ReadmeGenerator
         {
             Console.WriteLine($"{message}，按任意键退出！");
             Console.ReadKey();
+        }
+
+        static void WriteMessage(string message)
+        {
+            Console.WriteLine($"{message}，按任意键退出！");
         }
     }
 }

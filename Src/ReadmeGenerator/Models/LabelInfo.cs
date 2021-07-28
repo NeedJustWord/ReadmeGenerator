@@ -9,44 +9,55 @@ namespace ReadmeGenerator.Models
     /// </summary>
     class LabelInfo : AbstractInfo
     {
-        /// <summary>
-        /// 链接列表
-        /// </summary>
-        public List<LinkInfo> LinkInfos { get; }
+        private readonly List<LabelInfo> labelInfos;
+        private readonly List<LinkInfo> linkInfos;
+
+        public IEnumerable<AbstractInfo> Infos => labelInfos.Cast<AbstractInfo>().Concat(linkInfos);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="linkFullPaths">链接全路径列表</param>
-        public LabelInfo(string[] linkFullPaths) : base("未分类", "未分类")
+        /// <param name="readMeFilePath">readme文件目录</param>
+        /// <param name="fullPath">全路径</param>
+        /// <param name="level">层级</param>
+        /// <param name="order">序号</param>
+        /// <param name="searchPattern">文件搜索字符串</param>
+        public LabelInfo(string readMeFilePath, string fullPath, int level, int order, string searchPattern)
+            : this(readMeFilePath, fullPath, Path.GetFileName(fullPath), level, order, searchPattern)
         {
-            LinkInfos = linkFullPaths.Select(path => new LinkInfo(path)).ToList();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="fullPath">标签全路径</param>
-        /// <param name="linkFullPaths">链接全路径列表</param>
-        public LabelInfo(string fullPath, string[] linkFullPaths) : base(fullPath, Path.GetFileName(fullPath))
+        /// <param name="readMeFilePath">readme文件目录</param>
+        /// <param name="fullPath">全路径</param>
+        /// <param name="name">名称</param>
+        /// <param name="level">层级</param>
+        /// <param name="order">序号</param>
+        /// <param name="searchPattern">文件搜索字符串</param>
+        private LabelInfo(string readMeFilePath, string fullPath, string name, int level, int order, string searchPattern)
+            : base(readMeFilePath, fullPath, name, level, order)
         {
-            LinkInfos = linkFullPaths.Select(path => new LinkInfo(path)).ToList();
+            int tempOrder = 1;
+            labelInfos = Directory.GetDirectories(fullPath)
+                .Select((path, i) => new LabelInfo(readMeFilePath, path, level + 1, tempOrder + i, searchPattern))
+                .ToList();
+            linkInfos = Directory.GetFiles(fullPath, searchPattern)
+                .Select((path, i) => new LinkInfo(readMeFilePath, path, level + 1, labelInfos.Count + tempOrder + i))
+                .ToList();
         }
 
-        public override IEnumerable<string> GetWriteLines(string readMeFilePath)
+        public override IEnumerable<string> GetWriteLines()
         {
-            if (LinkInfos.Count > 0)
+            var url = GetUrl();
+            var linkText = $"{Order}.{Name}";
+            yield return $"{GetWhiteSpace()}{MarkdownHelper.LinkRowInner(linkText, url)}";
+            yield return null;
+
+            foreach (var item in Infos.SelectMany(t => t.GetWriteLines()))
             {
-                yield return MarkdownHelper.Heading2(Name);
-                yield return null;
-
-                foreach (var linkInfo in LinkInfos)
-                {
-                    foreach (var item in linkInfo.GetWriteLines(readMeFilePath))
-                    {
-                        yield return item;
-                    }
-                }
+                yield return item;
             }
         }
     }
