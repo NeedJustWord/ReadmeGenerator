@@ -8,39 +8,33 @@ namespace ReadmeGenerator
 {
     class ReadMeHelper
     {
-        private readonly string root;
-        private readonly string readMeFilePath;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="root">根目录</param>
-        /// <param name="readMeFilePath">readme文件目录</param>
-        public ReadMeHelper(string root, string readMeFilePath)
-        {
-            this.root = root;
-            this.readMeFilePath = readMeFilePath;
-        }
-
         /// <summary>
         /// 生成readme.md文件
         /// </summary>
-        public void CreateReadMeFie()
+        /// <param name="root">根目录</param>
+        /// <param name="readMeFilePath">readme文件目录</param>
+        public void CreateReadMeFie(string root, string readMeFilePath)
         {
             string filePath = Path.Combine(readMeFilePath, "readme.md");
             using (var stream = File.Create(filePath))
             {
                 using (var sw = new StreamWriter(stream, Encoding.UTF8))
                 {
-                    var headerInfos = GetHeaderInfos();
-                    foreach (var item in headerInfos)
+                    foreach (var item in GetHeaderInfos())
                     {
                         sw.WriteLine(item);
                     }
 
-                    var searchPattern = ConfigHelper.GetAppSettingValue("SearchPattern");
-                    var rootInfo = new LabelInfo(readMeFilePath, root, -1, 1, searchPattern);
-                    foreach (var item in rootInfo.Infos.SelectMany(t => t.GetWriteLines()))
+                    var rootInfo = new LabelInfo(readMeFilePath, root, -1, "", ConfigInfo.SearchPattern);
+                    if (ConfigInfo.IsPrintCatalogue)
+                    {
+                        foreach (var item in GetCatalogueInfos(rootInfo))
+                        {
+                            sw.WriteLine(item);
+                        }
+                    }
+
+                    foreach (var item in GetContentInfos(rootInfo))
                     {
                         sw.WriteLine(item);
                     }
@@ -54,10 +48,40 @@ namespace ReadmeGenerator
         /// <returns></returns>
         private IEnumerable<string> GetHeaderInfos()
         {
-            var heading = ConfigHelper.GetAppSettingValue("Heading");
+            yield return MarkdownHelper.Heading1(ConfigInfo.Heading);
             yield return null;
-            yield return MarkdownHelper.Heading1(heading);
+        }
+
+        /// <summary>
+        /// 获取readme.md的目录信息
+        /// </summary>
+        /// <param name="rootInfo"></param>
+        /// <returns></returns>
+        private IEnumerable<string> GetCatalogueInfos(LabelInfo rootInfo)
+        {
+            yield return MarkdownHelper.Heading3("目录");
             yield return null;
+            foreach (var item in rootInfo.LabelInfos.SelectMany(t => t.GetCatalogueLines()))
+            {
+                yield return item;
+            }
+            yield return null;
+            yield return null;
+            yield return MarkdownHelper.Heading3("内容");
+            yield return null;
+        }
+
+        /// <summary>
+        /// 获取readme.md的内容信息
+        /// </summary>
+        /// <param name="rootInfo"></param>
+        /// <returns></returns>
+        private IEnumerable<string> GetContentInfos(LabelInfo rootInfo)
+        {
+            foreach (var item in rootInfo.Infos.SelectMany(t => t.GetWriteLines()))
+            {
+                yield return item;
+            }
         }
     }
 }

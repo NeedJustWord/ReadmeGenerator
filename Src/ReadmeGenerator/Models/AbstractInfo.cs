@@ -27,15 +27,25 @@ namespace ReadmeGenerator.Models
         /// <summary>
         /// 序号
         /// </summary>
-        protected readonly int Order;
+        protected readonly string Order;
+        /// <summary>
+        /// 链接文本
+        /// </summary>
+        protected readonly string LinkText;
+        /// <summary>
+        /// 链接url
+        /// </summary>
+        protected readonly string Url;
 
-        protected AbstractInfo(string readMeFilePath, string fullPath, string name, int level, int order)
+        protected AbstractInfo(string readMeFilePath, string fullPath, string name, int level, string order)
         {
             ReadMeFilePath = readMeFilePath;
             FullPath = fullPath;
             Name = name;
             Level = level;
             Order = order;
+            LinkText = ConfigInfo.IsPrintOrder ? $"{Order.TrimStart('.')} {Name}" : Name;
+            Url = FullPath.Replace(ReadMeFilePath, "").Replace('\\', '/').Replace(" ", "%20").TrimStart('/');
         }
 
         /// <summary>
@@ -54,11 +64,6 @@ namespace ReadmeGenerator.Models
                 sb.Append(whiteSpace);
             }
             return sb.ToString();
-        }
-
-        protected string GetUrl()
-        {
-            return FullPath.Replace(ReadMeFilePath, "").Replace('\\', '/').Replace(" ", "%20").TrimStart('/');
         }
     }
 }
