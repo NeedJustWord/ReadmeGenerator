@@ -13,6 +13,7 @@ namespace ReadmeGenerator.Models
         public static readonly bool IsPrintCatalogue;
         public static readonly bool IsPrintExtension;
         public static readonly bool IsPrintOrder;
+        public static readonly string[] SkipDirs;
         public static readonly Func<string, string> GetNameFunc;
 
         static ConfigInfo()
@@ -24,6 +25,7 @@ namespace ReadmeGenerator.Models
             IsPrintCatalogue = GetAppSettingValue("IsPrintCatalogue") == "1";
             IsPrintExtension = GetAppSettingValue("IsPrintExtension") == "1";
             IsPrintOrder = GetAppSettingValue("IsPrintOrder") == "1";
+            SkipDirs = GetAppSettingValue("SkipDirs").ToLower().Split('\\');
             GetNameFunc = IsPrintExtension ? (Func<string, string>)Path.GetFileName : Path.GetFileNameWithoutExtension;
         }
 

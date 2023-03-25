@@ -26,6 +26,11 @@ namespace ReadmeGenerator.Models
         {
             int tempOrder = 1;
             LabelInfos = Directory.GetDirectories(fullPath)
+                .Where(path =>
+                {
+                    var name = Path.GetFileName(path).ToLower();
+                    return ConfigInfo.SkipDirs.All(t => t != name);
+                })
                 .Select((path, i) => new LabelInfo(readMeFilePath, path, level + 1, $"{order}{tempOrder + i}.", searchPattern))
                 .ToList();
             LinkInfos = Directory.GetFiles(fullPath, searchPattern)
